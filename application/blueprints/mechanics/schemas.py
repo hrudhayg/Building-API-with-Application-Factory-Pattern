@@ -7,11 +7,11 @@ class MechanicSchema(ma.SQLAlchemySchema):
         load_instance = True
         sqla_session = db.session
 
-    id = ma.auto_field()
-    name = ma.auto_field()
-    email = ma.auto_field()
-    phone = ma.auto_field()
-    salary = ma.auto_field()
+    id = ma.auto_field(dump_only=True)
+    name = ma.auto_field(required=True)
+    email = ma.auto_field(required=True)
+    phone = ma.auto_field(required=True)
+    salary = ma.auto_field(required=True)
 
 mechanic_schema = MechanicSchema()
 mechanics_schema = MechanicSchema(many=True)

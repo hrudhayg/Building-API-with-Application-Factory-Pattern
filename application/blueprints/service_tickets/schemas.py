@@ -1,6 +1,6 @@
 from marshmallow import fields
 from application.extensions import ma, db
-from application.models import ServiceTicket, Mechanic
+from application.models import ServiceTicket, Mechanic, Inventory
 
 class MechanicPublicSchema(ma.SQLAlchemySchema):
     class Meta:
@@ -8,9 +8,18 @@ class MechanicPublicSchema(ma.SQLAlchemySchema):
         load_instance = True
         sqla_session = db.session
 
-    # expose mechanic_id and name only (clean API surface)
     mechanic_id = fields.Integer(attribute="id", dump_only=True)
     name = ma.auto_field()
+
+class PartPublicSchema(ma.SQLAlchemySchema):
+    class Meta:
+        model = Inventory
+        load_instance = True
+        sqla_session = db.session
+
+    part_id = fields.Integer(attribute="id", dump_only=True)
+    name = ma.auto_field()
+    price = ma.auto_field()
 
 class ServiceTicketSchema(ma.SQLAlchemySchema):
     class Meta:
@@ -18,16 +27,14 @@ class ServiceTicketSchema(ma.SQLAlchemySchema):
         load_instance = True
         sqla_session = db.session
 
-    # alias "id" -> "ticket_id" in output
     ticket_id = fields.Integer(attribute="id", dump_only=True)
+    VIN = ma.auto_field(required=True)
+    service_date = ma.auto_field(required=True)  # YYYY-MM-DD
+    service_desc = ma.auto_field(required=True)
+    customer_id = ma.auto_field(required=True)
 
-    VIN = ma.auto_field()
-    service_date = ma.auto_field()         # YYYY-MM-DD
-    service_desc = ma.auto_field()
-    customer_id = ma.auto_field()
-
-    # mechanics list with mechanic_id + name
     mechanics = ma.Nested(MechanicPublicSchema, many=True, dump_only=True)
+    parts = ma.Nested(PartPublicSchema, many=True, dump_only=True)
 
 ticket_schema = ServiceTicketSchema()
 tickets_schema = ServiceTicketSchema(many=True)

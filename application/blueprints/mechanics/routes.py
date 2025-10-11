@@ -1,48 +1,34 @@
 from flask import request, jsonify
-from sqlalchemy import select
-from marshmallow import ValidationError
-from application.extensions import db
-from application.models import Mechanic
+from sqlalchemy import select, func
+
+from application.extensions import db, limiter
+from application.models import Mechanic, ServiceTicket, service_mechanics
 from . import mechanics_bp
-from .schemas import mechanic_schema, mechanics_schema
+from .schemas import mechanic_schema, mechanics_schema   # <-- only mechanic schemas
 
-
-# POST '/' : Create
+# POST '/'
 @mechanics_bp.post("/")
+@limiter.limit("20/minute")
 def create_mechanic():
-    """
-    Sample JSON body for Postman:
-    {
-        "name": "John Doe",
-        "email": "johndoe@example.com",
-        "phone": "123-456-7890",
-        "salary": 55000.0
-    }
-    """
-    try:
-        mech = mechanic_schema.load(request.json)
-    except ValidationError as e:
-        return jsonify(e.messages), 400
-
+    data = mechanic_schema.load(request.json)
     exists = db.session.execute(
-        select(Mechanic).where(Mechanic.email == mech.email)
+        select(Mechanic).where(Mechanic.email == data.email)
     ).scalars().first()
     if exists:
         return jsonify({"error": "Mechanic email already exists"}), 400
-
-    db.session.add(mech)
+    db.session.add(data)
     db.session.commit()
-    return mechanic_schema.jsonify(mech), 201
+    return mechanic_schema.jsonify(data), 201
 
-
-# GET '/' : Read all
+# GET '/'
 @mechanics_bp.get("/")
 def get_mechanics():
-    mechs = db.session.execute(select(Mechanic)).scalars().all()
+    mechs = db.session.execute(
+        select(Mechanic).order_by(Mechanic.id.asc())
+    ).scalars().all()
     return mechanics_schema.jsonify(mechs), 200
 
-
-# GET '/<int:mechanic_id>' : Read one
+# GET '/<id>'
 @mechanics_bp.get("/<int:mechanic_id>")
 def get_mechanic(mechanic_id: int):
     mech = db.session.get(Mechanic, mechanic_id)
@@ -50,34 +36,44 @@ def get_mechanic(mechanic_id: int):
         return jsonify({"error": "Mechanic not found"}), 404
     return mechanic_schema.jsonify(mech), 200
 
-
-# PUT '/<int:mechanic_id>' : Update
+# PUT '/<id>'
 @mechanics_bp.put("/<int:mechanic_id>")
 def update_mechanic(mechanic_id: int):
     mech = db.session.get(Mechanic, mechanic_id)
     if not mech:
         return jsonify({"error": "Mechanic not found"}), 404
-
-    try:
-        updated = mechanic_schema.load(request.json, instance=mech, partial=True)
-    except ValidationError as e:
-        return jsonify(e.messages), 400
-
+    payload = request.json or {}
+    for key in ("name", "email", "phone", "salary"):
+        if key in payload:
+            setattr(mech, key, payload[key])
     db.session.commit()
-    return mechanic_schema.jsonify(updated), 200
+    return mechanic_schema.jsonify(mech), 200
 
-
-# DELETE '/<int:mechanic_id>' : Delete
+# DELETE '/<id>'
 @mechanics_bp.delete("/<int:mechanic_id>")
 def delete_mechanic(mechanic_id: int):
     mech = db.session.get(Mechanic, mechanic_id)
     if not mech:
         return jsonify({"error": "Mechanic not found"}), 404
-
-    # If there's a many-to-many with tickets, clear junction rows first
-    if hasattr(mech, "tickets"):
-        mech.tickets.clear()
-
+    mech.tickets.clear()
     db.session.delete(mech)
     db.session.commit()
     return jsonify({"message": "Mechanic deleted"}), 200
+
+# GET '/leaderboard'
+@mechanics_bp.get("/leaderboard")
+def leaderboard():
+    rows = db.session.execute(
+        select(
+            Mechanic.id,
+            Mechanic.name,
+            func.count(service_mechanics.c.ticket_id).label("ticket_count")
+        )
+        .join(service_mechanics, Mechanic.id == service_mechanics.c.mechanic_id, isouter=True)
+        .group_by(Mechanic.id, Mechanic.name)
+        .order_by(func.count(service_mechanics.c.ticket_id).desc(), Mechanic.id.asc())
+    ).all()
+    return jsonify([
+        {"mechanic_id": r.id, "name": r.name, "ticket_count": int(r.ticket_count)}
+        for r in rows
+    ]), 200
