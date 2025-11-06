@@ -17,6 +17,7 @@ def _verify_customer(customer_id: int) -> bool:
 @limiter.limit("15/minute")
 def create_ticket():
     """
+    
     {
       "VIN": "1HGCM82633A004352",
       "service_date": "2025-09-01",
