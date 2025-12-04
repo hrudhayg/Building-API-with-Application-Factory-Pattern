@@ -1,40 +1,49 @@
-from marshmallow import fields
+from marshmallow import fields, validate
 from application.extensions import ma, db
 from application.models import ServiceTicket, Mechanic, Inventory
 
+# Public mechanic serializer
 class MechanicPublicSchema(ma.SQLAlchemySchema):
     class Meta:
         model = Mechanic
         load_instance = True
         sqla_session = db.session
 
-    mechanic_id = fields.Integer(attribute="id", dump_only=True)
-    name = ma.auto_field()
+    id = fields.Int()
+    name = fields.Str()
 
+
+# Public part serializer
 class PartPublicSchema(ma.SQLAlchemySchema):
     class Meta:
         model = Inventory
         load_instance = True
         sqla_session = db.session
 
-    part_id = fields.Integer(attribute="id", dump_only=True)
-    name = ma.auto_field()
-    price = ma.auto_field()
+    id = fields.Int()
+    name = fields.Str()
+    price = fields.Float()
 
+
+# Main ticket schema
 class ServiceTicketSchema(ma.SQLAlchemySchema):
     class Meta:
         model = ServiceTicket
         load_instance = True
         sqla_session = db.session
 
-    ticket_id = fields.Integer(attribute="id", dump_only=True)
-    VIN = ma.auto_field(required=True)
-    service_date = ma.auto_field(required=True)  # YYYY-MM-DD
-    service_desc = ma.auto_field(required=True)
-    customer_id = ma.auto_field(required=True)
+    # TESTS REQUIRE BOTH NAMES TO WORK
+    id = fields.Int(dump_only=True)
+    ticket_id = fields.Int(attribute="id", dump_only=True)
 
-    mechanics = ma.Nested(MechanicPublicSchema, many=True, dump_only=True)
-    parts = ma.Nested(PartPublicSchema, many=True, dump_only=True)
+    VIN = fields.Str(required=True)
+    service_date = fields.Date(required=True)
+    service_desc = fields.Str(required=True)
+    customer_id = fields.Int(required=True)
+
+    mechanics = fields.Nested(MechanicPublicSchema, many=True, dump_only=True)
+    parts = fields.Nested(PartPublicSchema, many=True, dump_only=True)
+
 
 ticket_schema = ServiceTicketSchema()
 tickets_schema = ServiceTicketSchema(many=True)

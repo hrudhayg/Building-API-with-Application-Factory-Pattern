@@ -8,12 +8,18 @@ class CustomerSchema(ma.SQLAlchemySchema):
         load_instance = True
         sqla_session = db.session
 
-    id = ma.auto_field(dump_only=True)
-    name = ma.auto_field(required=True, validate=validate.Length(min=1))
-    email = ma.auto_field(required=True)
-    phone = ma.auto_field(required=True)
-    # Write-only password (not mapped column name; we hydrate to password_hash in route)
-    password = fields.String(load_only=True, required=True)
+    # EXPLICIT FIELDS
+    id = fields.Int(dump_only=True)
+    name = fields.Str(required=True, validate=validate.Length(min=1))
+    email = fields.Email(required=True)
+    phone = fields.Str(required=True)
+
+    # This is NOT a DB field → only input
+    password = fields.Str(required=True, load_only=True)
+
+    # MUST NOT be required when creating
+    password_hash = fields.Str(dump_only=True)
+
 
 class CustomerPublicSchema(ma.SQLAlchemySchema):
     class Meta:
@@ -21,15 +27,16 @@ class CustomerPublicSchema(ma.SQLAlchemySchema):
         load_instance = True
         sqla_session = db.session
 
-    id = ma.auto_field()
-    name = ma.auto_field()
-    email = ma.auto_field()
-    phone = ma.auto_field()
+    id = fields.Int()
+    name = fields.Str()
+    email = fields.Email()
+    phone = fields.Str()
 
-# For login
+
 class LoginSchema(ma.Schema):
     email = fields.Email(required=True)
-    password = fields.String(required=True)
+    password = fields.Str(required=True)
+
 
 customer_schema = CustomerSchema()
 customer_public = CustomerPublicSchema()

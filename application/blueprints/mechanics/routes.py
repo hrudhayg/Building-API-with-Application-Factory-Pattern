@@ -1,5 +1,6 @@
 from flask import request, jsonify
 from sqlalchemy import select, func
+from marshmallow import ValidationError
 
 from application.extensions import db, limiter
 from application.models import Mechanic, ServiceTicket, service_mechanics
@@ -10,6 +11,10 @@ from .schemas import mechanic_schema, mechanics_schema   # <-- only mechanic sch
 @mechanics_bp.post("/")
 @limiter.limit("20/minute")
 def create_mechanic():
+    try:
+        data = mechanic_schema.load(request.json)
+    except ValidationError as err:
+        return {"errors": err.messages}, 400
     data = mechanic_schema.load(request.json)
     exists = db.session.execute(
         select(Mechanic).where(Mechanic.email == data.email)
