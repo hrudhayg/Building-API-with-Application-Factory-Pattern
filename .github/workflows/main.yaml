@@ -7,9 +7,8 @@ on:
     branches: [main, master]
 
 jobs:
-  build-and-test:
+  test:
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -22,10 +21,10 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # Point to the correct requirements file inside the project folder
+          # Force GitHub to use the updated file inside project/
           pip install -r project/requirements.txt 
 
       - name: Run unit tests
-        # Set the working directory so Python finds 'application' and 'tests'
+        # This tells Python that 'project' is the root, so 'import application' works
         working-directory: ./project
         run: python -m unittest discover -s tests -p 'test_*.py'
