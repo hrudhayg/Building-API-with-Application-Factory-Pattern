@@ -2,8 +2,8 @@ from flask import request, jsonify
 from sqlalchemy import select
 from marshmallow import ValidationError
 
-from application.extensions import db, limiter
-from application.models import Inventory
+from project.application.extensions import db, limiter
+from project.application.models import Inventory
 from . import inventory_bp
 from .schemas import inventory_schema, inventories_schema
 

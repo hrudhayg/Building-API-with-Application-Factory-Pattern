@@ -1,7 +1,7 @@
 from flask import Flask, jsonify
 from flask_swagger_ui import get_swaggerui_blueprint
 
-from .config.init import DevelopmentConfig, TestingConfig
+from .config.init import DevelopmentConfig, TestingConfig, ProductionConfig
 from .extensions import db, ma, limiter, cache, migrate
 from .models import Customer, Mechanic, ServiceTicket, Inventory
 
@@ -36,6 +36,8 @@ def create_app(config_name="DevelopmentConfig"):
     # ------------------------
     if config_name == "TestingConfig":
         app.config.from_object(TestingConfig)
+    elif config_name == "ProductionConfig":
+        app.config.from_object(ProductionConfig)
     else:
         app.config.from_object(DevelopmentConfig)
 
@@ -81,10 +83,10 @@ def create_app(config_name="DevelopmentConfig"):
             }
         })
 
-    # ------------------------
-    # Create Tables in Testing Mode
-    # ------------------------
-    with app.app_context():
-        db.create_all()
+    # Only auto-create tables in Testing mode
+    if config_name == "TestingConfig":
+        with app.app_context():
+            db.create_all()
+
 
     return app

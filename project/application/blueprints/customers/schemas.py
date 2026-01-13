@@ -1,6 +1,6 @@
 from marshmallow import fields, validate
-from application.extensions import ma, db
-from application.models import Customer
+from ...extensions import ma, db
+from ...models import Customer
 
 class CustomerSchema(ma.SQLAlchemySchema):
     class Meta:

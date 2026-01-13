@@ -1,6 +1,6 @@
 from marshmallow import fields, validate
-from application.extensions import ma, db
-from application.models import ServiceTicket, Mechanic, Inventory
+from ...extensions import ma, db
+from ...models import ServiceTicket, Mechanic, Inventory
 
 # Public mechanic serializer
 class MechanicPublicSchema(ma.SQLAlchemySchema):

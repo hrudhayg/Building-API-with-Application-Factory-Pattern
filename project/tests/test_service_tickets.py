@@ -1,5 +1,5 @@
 import unittest
-from application import create_app
+from project.application import create_app
 
 class CustomerRoutesTestCase(unittest.TestCase):
 

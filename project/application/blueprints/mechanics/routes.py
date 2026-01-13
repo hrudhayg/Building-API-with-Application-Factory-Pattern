@@ -2,8 +2,8 @@ from flask import request, jsonify
 from sqlalchemy import select, func
 from marshmallow import ValidationError
 
-from application.extensions import db, limiter
-from application.models import Mechanic, ServiceTicket, service_mechanics
+from project.application.extensions import db, limiter
+from project.application.models import Mechanic, ServiceTicket, service_mechanics
 from . import mechanics_bp
 from .schemas import mechanic_schema, mechanics_schema   # <-- only mechanic schemas
 

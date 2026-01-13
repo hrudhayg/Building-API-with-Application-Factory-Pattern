@@ -4,9 +4,9 @@ from sqlalchemy import select
 from werkzeug.security import generate_password_hash, check_password_hash
 from marshmallow import ValidationError
 
-from application.extensions import db, limiter, cache
-from application.models import Customer, ServiceTicket
-from application.auth import encode_token
+from ...extensions import db, limiter, cache
+from ...models import Customer, ServiceTicket
+from ...auth import encode_token
 from . import customers_bp
 from .schemas import customer_schema, customer_public, customers_public, login_schema
 

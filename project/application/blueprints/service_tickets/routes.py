@@ -3,9 +3,9 @@ from flask import request, jsonify
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
-from application.extensions import db, limiter, cache
-from application.models import ServiceTicket, Mechanic, Customer, Inventory
-from application.auth import token_required
+from ...extensions import db, limiter, cache
+from ...models import ServiceTicket, Mechanic, Customer, Inventory
+from ...auth import token_required
 from . import service_tickets_bp
 from .schemas import ticket_schema, tickets_schema
 

@@ -1,5 +1,5 @@
-from application.extensions import ma, db
-from application.models import Inventory
+from project.application.extensions import ma, db
+from project.application.models import Inventory
 
 class InventorySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
