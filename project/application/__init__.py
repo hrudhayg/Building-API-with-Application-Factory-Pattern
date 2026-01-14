@@ -16,7 +16,7 @@ from .blueprints.inventory import inventory_bp
 # Swagger Configuration
 # ----------------------------------------
 SWAGGER_URL = "/api/docs"
-API_URL = "/static/swagger.yaml"
+API_URL = "/static/swagger.yaml?v=2"
 
 swaggerui_blueprint = get_swaggerui_blueprint(
     SWAGGER_URL,
