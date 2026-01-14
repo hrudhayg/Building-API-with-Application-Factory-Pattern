@@ -3,9 +3,9 @@ info:
   title: "Mechanic Service API"
   description: "Flask-based REST API for managing customers, mechanics, service tickets, and inventory."
   version: "1.0.0"
-host: "127.0.0.1:5000"
+host: "building-api-with-application-factory-kccf.onrender.com"
 schemes:
-  - "http"
+  - "https"
 consumes:
   - "application/json"
 produces:
@@ -13,7 +13,7 @@ produces:
 
 paths:
 
-  /customers:
+  /customers/:
     get:
       summary: "List all customers"
       parameters:
@@ -93,7 +93,7 @@ paths:
         200:
           description: "Customer deleted"
 
-  /mechanics:
+  /mechanics/:
     get:
       summary: "List all mechanics"
       responses:
@@ -146,7 +146,7 @@ paths:
         200:
           description: "Deleted mechanic"
 
-  /inventory:
+  /inventory/:
     get:
       summary: "List inventory parts"
       responses:
@@ -199,7 +199,7 @@ paths:
         200:
           description: "Part deleted"
 
-  /service_tickets:
+  /service_tickets/:
     get:
       summary: "List all service tickets"
       responses:
